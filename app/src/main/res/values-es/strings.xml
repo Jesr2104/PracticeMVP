@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="film_name_description">Nombre película</string>
+    <string name="image_for_film_description">Imagen película</string>
+    <string name="original_language">Idioma original</string>
+    <string name="original_title">Titulo original</string>
+    <string name="release_data">Fecha de lanzamiento</string>
+    <string name="popularity">Popularidad</string>
+    <string name="vote_average">Valoración</string>
+    <string name="film_backdrop_description">Imagen de fondo película</string>
+</resources>
