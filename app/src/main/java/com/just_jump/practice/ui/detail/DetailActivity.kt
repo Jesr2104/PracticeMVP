@@ -13,7 +13,10 @@ import com.just_jump.practice.databinding.ActivityDetailBinding
 
 import com.just_jump.practice.model.Movie
 
-class DetailActivity : AppCompatActivity() {
+class DetailActivity : AppCompatActivity(), DetailPresenter.View {
+
+    private lateinit var binding: ActivityDetailBinding
+    private val presenter = DetailPresenter()
 
     companion object {
         const val EXTRA_MOVIE = "DetailActivity:movie"
@@ -21,7 +24,7 @@ class DetailActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val binding = ActivityDetailBinding.inflate(layoutInflater)
+        binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         setSupportActionBar(binding.detailActivityToolbar)
@@ -29,14 +32,19 @@ class DetailActivity : AppCompatActivity() {
 
         val movie = intent.getParcelableExtra<Movie>(EXTRA_MOVIE)
         if (movie != null) {
-            binding.detailActivityToolbar.title = movie.title
-            Glide
-                .with(this)
-                .load("https://image.tmdb.org/t/p/w780/${movie.backdrop_path}")
-                .into(binding.backdrop)
-            binding.summary.text = movie.overview
-            bindDetailInfo(binding.detailInfo,movie)
+            presenter.onCreate(this, movie)
         }
+    }
+
+    override fun update(movie: Movie) {
+        binding.detailActivityToolbar.title = movie.title
+        title = movie.title
+        Glide
+            .with(this)
+            .load("https://image.tmdb.org/t/p/w780/${movie.backdrop_path}")
+            .into(binding.backdrop)
+        binding.summary.text = movie.overview
+        bindDetailInfo(binding.detailInfo,movie)
     }
 
     private fun bindDetailInfo(detailInfo: TextView, movie: Movie) {
@@ -80,5 +88,10 @@ class DetailActivity : AppCompatActivity() {
             append(":")
         }
         appendLine(value)
+    }
+
+    override fun onDestroy() {
+        presenter.onDestroy()
+        super.onDestroy()
     }
 }

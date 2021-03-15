@@ -1,37 +1,26 @@
 package com.just_jump.practice.ui.main
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
-import android.location.Geocoder
-import android.location.Location
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
-import com.just_jump.practice.utilities.MovieClickedListener
-import com.just_jump.practice.R
 import com.just_jump.practice.databinding.ActivityMainBinding
 import com.just_jump.practice.model.Movie
-import com.just_jump.practice.model.MovieDbClient
 import com.just_jump.practice.ui.detail.DetailActivity
-import kotlinx.coroutines.launch
+import com.just_jump.practice.utilities.MovieClickedListener
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MainPresenter.View {
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var moviesAdapter: MovieAdapter
-
-    companion object {
-        private const val DEFAULT_REGION = "US"
-    }
+    private var presenter = MainPresenter()
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val requestPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
-            requestPopularMovies(isGranted)
+            presenter.requestPopularMovies(isGranted)
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,8 +28,12 @@ class MainActivity : AppCompatActivity() {
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        // this property need the context, for this reason, it's better to
+        // obtain the value a pass it by parameter to the presenter
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-        requestPermissionLauncher.launch(Manifest.permission.ACCESS_COARSE_LOCATION)
+        // ------------------------------------------------------------------------------
+
+        presenter.onCreate(this, requestPermissionLauncher,fusedLocationClient, applicationContext)
 
         moviesAdapter = MovieAdapter( emptyList(),
             object : MovieClickedListener {
@@ -53,43 +46,19 @@ class MainActivity : AppCompatActivity() {
         binding.recycleViewFilms.adapter = moviesAdapter
     }
 
-    @SuppressLint("MissingPermission")
-    private fun requestPopularMovies(isLocationGranted: Boolean) {
-        if (isLocationGranted) {
-            fusedLocationClient.lastLocation.addOnCompleteListener {
-                doRequestPopularMovies(getRegionFromLocation(it.result))
-            }
-        } else {
-            doRequestPopularMovies(DEFAULT_REGION)
-        }
-    }
-
-    private fun doRequestPopularMovies(region: String) {
-        lifecycleScope.launch {
-            val apiKey = getString(R.string.api_key)
-            val popularMovies = MovieDbClient.service.listPopularMovies(apiKey, region)
-            moviesAdapter.movies = popularMovies.results
-            moviesAdapter.notifyDataSetChanged()
-        }
-    }
-
-    private fun getRegionFromLocation(location: Location?): String {
-        if(location == null){
-            return DEFAULT_REGION
-        }
-
-        val geoCoder = Geocoder(this)
-        val result = geoCoder.getFromLocation(
-            location.latitude,
-            location.longitude,
-            1
-        )
-        return result.firstOrNull()?.countryCode ?: DEFAULT_REGION
-    }
-
     private fun navigationTo(movie: Movie) {
         val intent = Intent(this, DetailActivity::class.java)
         intent.putExtra(DetailActivity.EXTRA_MOVIE, movie)
         startActivity(intent)
+    }
+
+    override fun updateData(movies: List<Movie>) {
+        moviesAdapter.movies = movies
+        moviesAdapter.notifyDataSetChanged()
+    }
+
+    override fun onDestroy() {
+        presenter.onDestroy()
+        super.onDestroy()
     }
 }

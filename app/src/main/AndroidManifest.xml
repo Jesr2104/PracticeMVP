@@ -3,7 +3,7 @@
     package="com.just_jump.practice">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -12,11 +12,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Practice_MVP_MVVM">
-
         <activity
             android:name=".ui.detail.DetailActivity"
-            android:theme="@style/Theme.Practice_MVP_MVVM.NoActionBar"/>
-
+            android:theme="@style/Theme.Practice_MVP_MVVM.NoActionBar" />
         <activity android:name=".ui.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
