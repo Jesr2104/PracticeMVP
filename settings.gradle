@@ -1,2 +1,2 @@
 include ':app'
-rootProject.name = "Practice_MVP_MVVM"
+rootProject.name = "PracticeMVP"
